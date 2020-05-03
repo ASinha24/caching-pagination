@@ -7,6 +7,7 @@ import (
 	"strconv"
 )
 
+//WriteResponse response writer to client
 func WriteResponse(status int, response interface{}, rw http.ResponseWriter) {
 	rw.Header().Add("Content-Type", "application/json")
 	rw.WriteHeader(status)
@@ -15,6 +16,7 @@ func WriteResponse(status int, response interface{}, rw http.ResponseWriter) {
 	}
 }
 
+//WriteErrorResponse eror writer to client
 func WriteErrorResponse(status int, err error, rw http.ResponseWriter) {
 	// martErr, ok := err.(*api.MartError)
 	// if !ok {

@@ -11,6 +11,7 @@ import (
 	"github.com/alka/supermart"
 	"github.com/alka/supermart/api"
 	"github.com/alka/supermart/http/utils"
+	"github.com/alka/supermart/store"
 )
 
 var (
@@ -20,15 +21,17 @@ var (
 
 func InstallRoutes(mux *mux.Router) {
 	// Create a new item of super mart
-	mux.Methods(http.MethodPost).Path("/supermarts/items").HandlerFunc(createItem)
+	mux.Methods(http.MethodPost).Path("/api/v1/supermarts/items").HandlerFunc(createItem)
 	// Update an existing item of a mart
-	mux.Methods(http.MethodPut).Path("/supermarts/items/{itemID}").HandlerFunc(updateItem)
+	mux.Methods(http.MethodPut).Path("/api/v1/supermarts/items/{itemID}").HandlerFunc(updateItem)
 	// delete any item of a mart
-	mux.Methods(http.MethodDelete).Path("/supermarts/items/{itemID}").HandlerFunc(deleteItem)
+	mux.Methods(http.MethodDelete).Path("/api/v1/supermarts/items/{itemID}").HandlerFunc(deleteItem)
 	// List all items of a supermart
-	mux.Methods(http.MethodGet).Path("/supermarts/items").HandlerFunc(getItems)
+	mux.Methods(http.MethodGet).Path("/api/v1/supermarts/items").HandlerFunc(getItems)
+	mux.Methods(http.MethodGet).Path("/api/v1/supermarts/items/kafka").HandlerFunc(sendKafkaNotification)
 }
 
+//createItem create item
 func createItem(w http.ResponseWriter, r *http.Request) {
 	itemCreateReq := &api.ItemRequest{}
 	if err := json.NewDecoder(r.Body).Decode(itemCreateReq); err != nil {
@@ -44,6 +47,7 @@ func createItem(w http.ResponseWriter, r *http.Request) {
 	utils.WriteResponse(http.StatusCreated, resp, w)
 }
 
+//updateItem update item
 func updateItem(w http.ResponseWriter, r *http.Request) {
 	itemID := mux.Vars(r)["itemID"]
 
@@ -69,6 +73,7 @@ func updateItem(w http.ResponseWriter, r *http.Request) {
 	utils.WriteResponse(http.StatusCreated, resp, w)
 }
 
+//deleteItem delete item
 func deleteItem(w http.ResponseWriter, r *http.Request) {
 	itemID := mux.Vars(r)["itemID"]
 	res, err := supermart.DeleteItem(r.Context(), itemID)
@@ -80,8 +85,19 @@ func deleteItem(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+//getItems get all items
 func getItems(w http.ResponseWriter, r *http.Request) {
 	items, err := supermart.GetItems(r.Context(), r)
+	if err != nil {
+		utils.WriteErrorResponse(http.StatusInternalServerError, err, w)
+		return
+	}
+	utils.WriteResponse(http.StatusOK, items, w)
+}
+
+//sendKafkaNotification kafka notification
+func sendKafkaNotification(w http.ResponseWriter, r *http.Request) {
+	items, err := store.SendKafkaNotification()
 	if err != nil {
 		utils.WriteErrorResponse(http.StatusInternalServerError, err, w)
 		return

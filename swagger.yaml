@@ -1,0 +1,120 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: supermart
+  description: supermart microservice with cache, pagination and kafka implenetation
+schemes: [http]
+host: supermart.org
+basePath: /api/v1
+consumes: [application/json]
+produces: [application/json]
+paths:
+  /supermarts/items:
+    post: 
+      tags: [item]
+      operationId: Create
+      parameters:
+      - in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/item'
+      responses:
+        201:
+          description: item Created
+          schema:
+            $ref: '#/definitions/itemResponse'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/APIResponse'
+    get:
+      tags: [item]
+      operationId: List
+      parameters:
+      - in: query
+        name: items
+        type: string
+      responses:
+        200:
+          description: 'item list'
+          schema:
+            type: array
+            items:
+                $ref: '#/definitions/itemResponse'
+  /supermarts/items/{itemID}:
+    delete:
+      tags: [item]
+      operationId: delete
+      parameters: 
+      - name: itemID
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: item deleted
+    put:
+      tags: [item]
+      operationId: put
+      parameters:
+      - name: itemID
+        in: path
+        required: true
+        type: string
+      - name: item
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/item'
+      responses:
+          200:
+            description: 'item updated'
+            schema:
+              $ref: '#/definitions/itemResponse'
+definitions:
+  item:
+    type: object
+    required:
+    - Name
+    - Price
+    - Quantity
+    properties:
+      Name:
+        type: string
+        example: teabag
+      Quantity:
+        type: integer
+        format: int64
+        example: 30
+      Price:
+        type: integer
+        format: float64
+        example: 50.0
+  itemResponse:
+    type: object
+    properties:
+      ID:
+        type: string
+      Name:
+        type: string
+        example: teabag
+      Quantity:
+        type: integer
+        format: int64
+        example: 50
+      Price:
+        type: integer
+        format: float64
+        example: 50.0
+  APIResponse:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          format: "int32"
+        type:
+          type: "string"
+        message:
+          type: "string"
+      

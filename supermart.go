@@ -19,6 +19,7 @@ import (
 
 var cacheInmem []*model.Item
 
+//CreateItem create item and parallely save into cache
 func CreateItem(ctx context.Context, item *api.ItemRequest) (*api.CreateItemRespose, error) {
 	res, err := store.CreateItem(ctx, &model.Item{
 		ID:       uuid.New(),
@@ -43,6 +44,7 @@ func CreateItem(ctx context.Context, item *api.ItemRequest) (*api.CreateItemResp
 	return &api.CreateItemRespose{ID: res.InsertedID.(string), ItemRequest: item}, nil
 }
 
+//DeleteItem delete item and parallely save the update into cache
 func DeleteItem(ctx context.Context, itemID string) (*mongo.DeleteResult, error) {
 	res, err := store.DeleteItem(ctx, bson.M{"_id": itemID})
 	if err != nil {
@@ -64,6 +66,7 @@ func DeleteItem(ctx context.Context, itemID string) (*mongo.DeleteResult, error)
 	return res, nil
 }
 
+//UpdateItem update item and parallely save the update into cache
 func UpdateItem(ctx context.Context, itemID string, update interface{}, item *api.ItemRequest) (*api.CreateItemRespose, error) {
 
 	err := store.UpdateItem(ctx, bson.M{"_id": itemID}, update, &model.Item{
@@ -96,6 +99,7 @@ func UpdateItem(ctx context.Context, itemID string, update interface{}, item *ap
 	return &api.CreateItemRespose{ItemRequest: item}, nil
 }
 
+//GetItems get item from cache
 func GetItems(ctx context.Context, r *http.Request) ([]api.CreateItemRespose, error) {
 
 	items, err := store.GetAllMartItems(ctx, bson.M{})
